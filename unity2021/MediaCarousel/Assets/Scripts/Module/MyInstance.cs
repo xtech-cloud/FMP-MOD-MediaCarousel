@@ -10,7 +10,6 @@ using XTC.FMP.MOD.MediaCarousel.LIB.MVCS;
 using Newtonsoft.Json;
 using System.Text;
 using System.Collections;
-using Unity.VisualScripting.Dependencies.NCalc;
 
 namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
 {

@@ -1,0 +1,19 @@
+
+/_dist_/
+/_build_/
+/MediaCarousel/Assets/TextMesh Pro/
+/MediaCarousel/Assets/TextMesh Pro.meta
+/MediaCarousel/Assets/Plugins/
+/MediaCarousel/Assets/Plugins.meta
+/MediaCarousel/Assets/3rd/
+/MediaCarousel/Assets/3rd.meta
+/MediaCarousel/Library/
+/MediaCarousel/obj/
+/MediaCarousel/Logs/
+/MediaCarousel/Temp/
+/MediaCarousel/UserSettings/
+/MediaCarousel/*.sln
+/MediaCarousel/*.csproj
+/MediaCarousel/.vsconfig
+/MediaCarousel/.vs/
+/.UNITY_HOME.env

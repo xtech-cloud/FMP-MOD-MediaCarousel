@@ -23,38 +23,72 @@
         <OnClickSubjectS>
         </OnClickSubjectS>
       </ClickArea>
-      <ImageSlide>
-        <OnCreatedSubjectS>
-          <Subject message="/XTC/ImageSee/Create">
-            <Parameters>
-              <Parameter key="uid" value="{{slide_uuid}}" type="_"/>
-              <Parameter key="style" value="XTC_MediaCarousel" type="string"/>
-              <Parameter key="uiRoot" value="MainCanvas/[root]" type="string"/>
-              <Parameter key="uiSlot" value="{{slide_slot}}" type="string"/>
-              <Parameter key="worldRoot" value="" type="string"/>
-              <Parameter key="worldSlot" value="" type="string"/>
-            </Parameters>
-          </Subject>
-        </OnCreatedSubjectS>
-        <OnActivatedSubjectS>
-          <Subject message="/XTC/ImageSee/Open">
-            <Parameters>
-              <Parameter key="uid" value="{{slide_uuid}}" type="_"/>
-              <Parameter key="source" value="assloud://" type="string"/>
-              <Parameter key="uri" value="{{slide_uri}}" type="string"/>
-              <Parameter key="delay" value="0" type="float"/>
-            </Parameters>
-          </Subject>
-        </OnActivatedSubjectS>
-        <OnClosedSubjectS>
-          <Subject message="/XTC/ImageSee/Close">
-            <Parameters>
-              <Parameter key="uid" value="{{slide_uuid}}" type="string"/>
-              <Parameter key="delay" value="0" type="float"/>
-            </Parameters>
-          </Subject>
-        </OnClosedSubjectS>
-      </ImageSlide>
+      <SlideS>
+        <Slide type="Image">
+          <OnCreatedSubjectS>
+            <Subject message="/XTC/ImageSee/Create">
+              <Parameters>
+                <Parameter key="uid" value="{{slide_uuid}}" type="_"/>
+                <Parameter key="style" value="XTC_MediaCarousel" type="string"/>
+                <Parameter key="uiRoot" value="MainCanvas/[root]" type="string"/>
+                <Parameter key="uiSlot" value="{{slide_slot}}" type="string"/>
+                <Parameter key="worldRoot" value="" type="string"/>
+                <Parameter key="worldSlot" value="" type="string"/>
+              </Parameters>
+            </Subject>
+          </OnCreatedSubjectS>
+          <OnActivatedSubjectS>
+            <Subject message="/XTC/ImageSee/Open">
+              <Parameters>
+                <Parameter key="uid" value="{{slide_uuid}}" type="_"/>
+                <Parameter key="source" value="assloud://" type="string"/>
+                <Parameter key="uri" value="{{slide_uri}}" type="string"/>
+                <Parameter key="delay" value="0" type="float"/>
+              </Parameters>
+            </Subject>
+          </OnActivatedSubjectS>
+          <OnClosedSubjectS>
+            <Subject message="/XTC/ImageSee/Close">
+              <Parameters>
+                <Parameter key="uid" value="{{slide_uuid}}" type="string"/>
+                <Parameter key="delay" value="0" type="float"/>
+              </Parameters>
+            </Subject>
+          </OnClosedSubjectS>
+        </Slide>
+        <Slide type="Video">
+          <OnCreatedSubjectS>
+            <Subject message="/XTC/VideoSee/Create">
+              <Parameters>
+                <Parameter key="uid" value="{{slide_uuid}}" type="_"/>
+                <Parameter key="style" value="XTC_MediaCarousel" type="string"/>
+                <Parameter key="uiRoot" value="MainCanvas/[root]" type="string"/>
+                <Parameter key="uiSlot" value="{{slide_slot}}" type="string"/>
+                <Parameter key="worldRoot" value="" type="string"/>
+                <Parameter key="worldSlot" value="" type="string"/>
+              </Parameters>
+            </Subject>
+          </OnCreatedSubjectS>
+          <OnActivatedSubjectS>
+            <Subject message="/XTC/VideoSee/Open">
+              <Parameters>
+                <Parameter key="uid" value="{{slide_uuid}}" type="_"/>
+                <Parameter key="source" value="assloud://" type="string"/>
+                <Parameter key="uri" value="{{slide_uri}}" type="string"/>
+                <Parameter key="delay" value="0" type="float"/>
+              </Parameters>
+            </Subject>
+          </OnActivatedSubjectS>
+          <OnClosedSubjectS>
+            <Subject message="/XTC/VideoSee/Close">
+              <Parameters>
+                <Parameter key="uid" value="{{slide_uuid}}" type="string"/>
+                <Parameter key="delay" value="0" type="float"/>
+              </Parameters>
+            </Subject>
+          </OnClosedSubjectS>
+        </Slide>
+      </SlideS>
     </Style>
   </Styles>
   <!-- 预创建的实例列表

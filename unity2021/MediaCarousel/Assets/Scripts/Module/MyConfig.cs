@@ -8,8 +8,10 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
     /// </summary>
     public class MyConfig : MyConfigBase
     {
-        public class ImageSlide
+        public class Slide
         {
+            [XmlAttribute("type")]
+            public string type { get; set; } = "";
             [XmlArray("OnCreatedSubjectS"), XmlArrayItem("Subject")]
             public Subject[] onCreatedSubjectS { get; set; } = new Subject[0];
             [XmlArray("OnActivatedSubjectS"), XmlArrayItem("Subject")]
@@ -31,8 +33,8 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
             public string name { get; set; } = "";
             [XmlElement("ClickArea")]
             public ClickArea clickArea { get; set; }
-            [XmlElement("ImageSlide")]
-            public ImageSlide imageSlide { get; set; } = new ImageSlide();
+            [XmlArray("SlideS"), XmlArrayItem("Slide")]
+            public Slide[] slideS{ get; set; } = new Slide[0];
         }
 
 

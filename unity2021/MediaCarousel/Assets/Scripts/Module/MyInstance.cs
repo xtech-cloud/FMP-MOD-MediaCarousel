@@ -10,6 +10,7 @@ using XTC.FMP.MOD.MediaCarousel.LIB.MVCS;
 using Newtonsoft.Json;
 using System.Text;
 using System.Collections;
+using Unity.VisualScripting.Dependencies.NCalc;
 
 namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
 {
@@ -25,7 +26,8 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
         {
             public GameObject slot;
             public int index;
-            public string uri;
+            public string contentUri;
+            public string attachmentUri;
             public int duration;
             public string type;
         }
@@ -95,6 +97,13 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
             contentReader_ = new ContentReader(contentObjectsPool);
             contentReader_.AssetRootPath = settings_["path.assets"].AsString();
 
+            CounterSequence counterSequence = new CounterSequence(0);
+            counterSequence.OnFinish = () =>
+            {
+                onSlideActivated();
+                coroutineTick_ = mono_.StartCoroutine(tick());
+            };
+
             int slideIndex = 0;
             foreach (var section in catalog_.sectionS)
             {
@@ -104,43 +113,49 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
                     slide.slot = GameObject.Instantiate(uiReference.slideSlot.gameObject, uiReference.slideSlot.parent);
                     slide.slot.name = slideIndex.ToString();
                     slide.index = slideIndex;
+                    slide.contentUri = content;
                     slideIndex += 1;
                     slideS_.Add(slide);
-                    contentReader_.ContentUri = content;
-                    contentReader_.LoadText("meta.json", (_byte) =>
-                    {
-                        string valueSlide = "";
-                        int valueDuration = 0;
-                        try
-                        {
-                            string json = Encoding.UTF8.GetString(_byte);
-                            ContentMetaSchema schema = JsonConvert.DeserializeObject<ContentMetaSchema>(json);
-                            foreach (var file in schema.AttachmentS)
-                            {
-                                slide.uri = string.Format("{0}/_attachments/{1}", schema.foreign_bundle_uuid, file.path);
-                            }
-                            string strDuration;
-                            if (schema.kvS.TryGetValue("XTC_MediaCarousel/duration", out strDuration))
-                            {
-                                valueDuration = int.Parse(strDuration);
-                            }
-                            schema.kvS.TryGetValue("XTC_MediaCarousel/slide", out valueSlide);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            logger_.Exception(ex);
-                        }
-                        slide.duration = valueDuration;
-                        slide.type = valueSlide;
-                        onSlideCreated(slide);
-                    }, () => { });
+                    counterSequence.Dial();
                 }
+            }
+
+            foreach (var slide in slideS_)
+            {
+                contentReader_.ContentUri = slide.contentUri;
+                contentReader_.LoadText("meta.json", (_byte) =>
+                {
+                    string valueSlide = "";
+                    int valueDuration = 0;
+                    try
+                    {
+                        string json = Encoding.UTF8.GetString(_byte);
+                        ContentMetaSchema schema = JsonConvert.DeserializeObject<ContentMetaSchema>(json);
+                        foreach (var file in schema.AttachmentS)
+                        {
+                            slide.attachmentUri = string.Format("{0}/_attachments/{1}", schema.foreign_bundle_uuid, file.path);
+                        }
+                        string strDuration;
+                        if (schema.kvS.TryGetValue("XTC_MediaCarousel/duration", out strDuration))
+                        {
+                            valueDuration = int.Parse(strDuration);
+                        }
+                        schema.kvS.TryGetValue("XTC_MediaCarousel/slide", out valueSlide);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        logger_.Exception(ex);
+                    }
+                    slide.duration = valueDuration;
+                    slide.type = valueSlide;
+                    onSlideCreated(slide);
+                    counterSequence.Tick();
+                }, () => { });
+
             }
 
             rootUI.gameObject.SetActive(true);
             rootWorld.gameObject.SetActive(true);
-            onSlideActivated();
-            coroutineTick_ = mono_.StartCoroutine(tick());
         }
 
         /// <summary>
@@ -195,20 +210,39 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
             Dictionary<string, object> openedVariableS = new Dictionary<string, object>();
             openedVariableS["{{slide_uuid}}"] = string.Format("XTC_MediaCarousel_{0}_slide_{1}", uid, slide.index);
             openedVariableS["{{slide_slot}}"] = getPathOfTransform(slide.slot.transform);
-            openedVariableS["{{slide_uri}}"] = slide.uri;
-            publishSubjects(style_.imageSlide.onActivatedSubjectS, openedVariableS);
+            openedVariableS["{{slide_uri}}"] = slide.attachmentUri;
+            MyConfig.Slide foundSlide = null;
+            foreach (var theSlide in style_.slideS)
+            {
+                if (slide.type == theSlide.type)
+                    foundSlide = theSlide;
+            }
+            if (null == foundSlide)
+            {
+                logger_.Error("slide:{0} not found", slide.type);
+                return;
+            }
+            publishSubjects(foundSlide.onActivatedSubjectS, openedVariableS);
         }
 
         private void onSlideCreated(Slide _slide)
         {
-            if (_slide.type == "Image")
+            MyConfig.Slide foundSlide = null;
+            foreach (var slide in style_.slideS)
             {
-                Dictionary<string, object> openedVariableS = new Dictionary<string, object>();
-                openedVariableS["{{slide_uuid}}"] = string.Format("XTC_MediaCarousel_{0}_slide_{1}", uid, _slide.index);
-                openedVariableS["{{slide_slot}}"] = getPathOfTransform(_slide.slot.transform);
-                openedVariableS["{{slide_uri}}"] = _slide.uri;
-                publishSubjects(style_.imageSlide.onCreatedSubjectS, openedVariableS);
+                if (slide.type == _slide.type)
+                    foundSlide = slide;
             }
+            if (null == foundSlide)
+            {
+                logger_.Error("slide:{0} not found", _slide.type);
+                return;
+            }
+            Dictionary<string, object> openedVariableS = new Dictionary<string, object>();
+            openedVariableS["{{slide_uuid}}"] = string.Format("XTC_MediaCarousel_{0}_slide_{1}", uid, _slide.index);
+            openedVariableS["{{slide_slot}}"] = getPathOfTransform(_slide.slot.transform);
+            openedVariableS["{{slide_uri}}"] = _slide.attachmentUri;
+            publishSubjects(foundSlide.onCreatedSubjectS, openedVariableS);
         }
 
         private string getPathOfTransform(Transform _transform)

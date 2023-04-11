@@ -10,8 +10,10 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
     {
         public class ImageSlide
         {
-            [XmlElement("OnOpenedSubjectS")]
-            public Subject[] onOpenedSubjectS { get; set; } = new Subject[0];
+            [XmlArray("OnCreatedSubjectS"), XmlArrayItem("Subject")]
+            public Subject[] onCreatedSubjectS { get; set; } = new Subject[0];
+            [XmlArray("OnActivatedSubjectS"), XmlArrayItem("Subject")]
+            public Subject[] onActivatedSubjectS { get; set; } = new Subject[0];
         }
 
         public class ClickArea

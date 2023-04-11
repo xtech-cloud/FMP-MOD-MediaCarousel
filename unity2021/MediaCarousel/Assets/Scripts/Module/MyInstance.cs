@@ -23,10 +23,19 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
 
         public class Slide
         {
+            public GameObject slot;
             public int index;
-            public string source;
+            public string uri;
             public int duration;
+            public string type;
         }
+
+        public class UiRefrence
+        {
+            public Transform slideSlot;
+        }
+
+        private UiRefrence uiReference = new UiRefrence();
 
         private List<Slide> slideS_ = new List<Slide>();
         private float timer_ = 0;
@@ -64,7 +73,8 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
                 });
             }
 
-
+            uiReference.slideSlot = rootUI.transform.Find("SlideS/slot");
+            uiReference.slideSlot.gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -85,13 +95,14 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
             contentReader_ = new ContentReader(contentObjectsPool);
             contentReader_.AssetRootPath = settings_["path.assets"].AsString();
 
-
             int slideIndex = 0;
             foreach (var section in catalog_.sectionS)
             {
                 foreach (var content in section.contentS)
                 {
                     Slide slide = new Slide();
+                    slide.slot = GameObject.Instantiate(uiReference.slideSlot.gameObject, uiReference.slideSlot.parent);
+                    slide.slot.name = slideIndex.ToString();
                     slide.index = slideIndex;
                     slideIndex += 1;
                     slideS_.Add(slide);
@@ -106,8 +117,7 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
                             ContentMetaSchema schema = JsonConvert.DeserializeObject<ContentMetaSchema>(json);
                             foreach (var file in schema.AttachmentS)
                             {
-                                slide.source = string.Format("{0}/_attachments/{1}", schema.foreign_bundle_uuid, file.path);
-                                logger_.Info(slide.source);
+                                slide.uri = string.Format("{0}/_attachments/{1}", schema.foreign_bundle_uuid, file.path);
                             }
                             string strDuration;
                             if (schema.kvS.TryGetValue("XTC_MediaCarousel/duration", out strDuration))
@@ -121,18 +131,15 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
                             logger_.Exception(ex);
                         }
                         slide.duration = valueDuration;
-                        if (valueSlide == "Image")
-                        {
-                            Dictionary<string, object> openedVariableS = new Dictionary<string, object>();
-                            openedVariableS["{{slide_uuid}}"] = string.Format("XTC_MediaCarousel_{0}_slide_{1}", uid, slide.index);
-                            publishSubjects(style_.imageSlide.onOpenedSubjectS, openedVariableS);
-                        }
+                        slide.type = valueSlide;
+                        onSlideCreated(slide);
                     }, () => { });
                 }
             }
 
             rootUI.gameObject.SetActive(true);
             rootWorld.gameObject.SetActive(true);
+            onSlideActivated();
             coroutineTick_ = mono_.StartCoroutine(tick());
         }
 
@@ -159,17 +166,61 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
             while (true)
             {
                 yield return new WaitForSeconds(1);
-                timer_ += 1;
+                if (currentSlideIndex_ >= slideS_.Count)
+                    continue;
                 var slide = slideS_[currentSlideIndex_];
+                timer_ += 1;
                 if (timer_ > slide.duration)
                 {
                     currentSlideIndex_ += 1;
                     if (currentSlideIndex_ >= slideS_.Count)
                         currentSlideIndex_ = 0;
                     timer_ = 0;
-                    //publishSubjects();
+                    onSlideActivated();
                 }
             }
+        }
+
+        private void onSlideActivated()
+        {
+            int oldIndex = currentSlideIndex_ - 1 < 0 ? slideS_.Count - 1 : currentSlideIndex_ - 1;
+            if (currentSlideIndex_ >= slideS_.Count)
+            {
+                logger_.Error("want to active a slide out of range");
+                return;
+            }
+            slideS_[oldIndex].slot.gameObject.SetActive(false);
+            var slide = slideS_[currentSlideIndex_];
+            slide.slot.gameObject.SetActive(true);
+            Dictionary<string, object> openedVariableS = new Dictionary<string, object>();
+            openedVariableS["{{slide_uuid}}"] = string.Format("XTC_MediaCarousel_{0}_slide_{1}", uid, slide.index);
+            openedVariableS["{{slide_slot}}"] = getPathOfTransform(slide.slot.transform);
+            openedVariableS["{{slide_uri}}"] = slide.uri;
+            publishSubjects(style_.imageSlide.onActivatedSubjectS, openedVariableS);
+        }
+
+        private void onSlideCreated(Slide _slide)
+        {
+            if (_slide.type == "Image")
+            {
+                Dictionary<string, object> openedVariableS = new Dictionary<string, object>();
+                openedVariableS["{{slide_uuid}}"] = string.Format("XTC_MediaCarousel_{0}_slide_{1}", uid, _slide.index);
+                openedVariableS["{{slide_slot}}"] = getPathOfTransform(_slide.slot.transform);
+                openedVariableS["{{slide_uri}}"] = _slide.uri;
+                publishSubjects(style_.imageSlide.onCreatedSubjectS, openedVariableS);
+            }
+        }
+
+        private string getPathOfTransform(Transform _transform)
+        {
+            string path = "";
+            Transform parent = _transform;
+            while (null != parent)
+            {
+                path = string.Format("/{0}", parent.name) + path;
+                parent = parent.parent;
+            }
+            return path;
         }
     }
 }

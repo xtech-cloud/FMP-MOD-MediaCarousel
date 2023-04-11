@@ -1,0 +1,11 @@
+{
+    "Uuid": "1",
+    "foreign_bundle_uuid": "XTC.MediaCarousel",
+    "kvS": {
+        "XTC_MediaCarousel/duration": "2",
+        "XTC_MediaCarousel/slide": "Image"
+    },
+    "AttachmentS": [{
+        "path": "slide-1.jpg"
+    }]
+}

@@ -34,12 +34,13 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
         public class UiRefrence
         {
             public Transform slideSlot;
+            public Button btnPrev;
+            public Button btnNext;
         }
 
         private UiRefrence uiReference = new UiRefrence();
 
         private List<Slide> slideS_ = new List<Slide>();
-        private float timer_ = 0;
 
         private Coroutine coroutineTick_ = null;
 
@@ -62,6 +63,21 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
                 return;
             }
 
+            uiReference.btnPrev = rootUI.transform.Find("btnPrev").GetComponent<Button>();
+            uiReference.btnPrev.gameObject.SetActive(!style_.autoSwitch);
+            alignByAncor(uiReference.btnPrev.transform, style_.btnPrev.anchor);
+            loadTextureFromTheme(style_.btnPrev.image, (_texture) =>
+            {
+                uiReference.btnPrev.GetComponent<RawImage>().texture = _texture;
+            }, () => { });
+            uiReference.btnNext = rootUI.transform.Find("btnNext").GetComponent<Button>();
+            uiReference.btnNext.gameObject.SetActive(!style_.autoSwitch);
+            alignByAncor(uiReference.btnNext.transform, style_.btnNext.anchor);
+            loadTextureFromTheme(style_.btnNext.image, (_texture) =>
+            {
+                uiReference.btnNext.GetComponent<RawImage>().texture = _texture;
+            }, () => { });
+
             var btnClickArea = rootUI.transform.Find("ClickArea").GetComponent<Button>();
             btnClickArea.gameObject.SetActive(false);
             if (null != style_.clickArea)
@@ -76,6 +92,21 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
 
             uiReference.slideSlot = rootUI.transform.Find("SlideS/slot");
             uiReference.slideSlot.gameObject.SetActive(false);
+
+            uiReference.btnPrev.onClick.AddListener(() =>
+            {
+                currentSlideIndex_ -= 1;
+                if (currentSlideIndex_ < 0)
+                    currentSlideIndex_ = slideS_.Count - 1;
+                onSlideActivated();
+            });
+            uiReference.btnNext.onClick.AddListener(() =>
+            {
+                currentSlideIndex_ += 1;
+                if (currentSlideIndex_ >= slideS_.Count)
+                    currentSlideIndex_ = 0;
+                onSlideActivated();
+            });
         }
 
         /// <summary>
@@ -100,7 +131,10 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
             counterSequence.OnFinish = () =>
             {
                 onSlideActivated();
-                coroutineTick_ = mono_.StartCoroutine(tick());
+                if (style_.autoSwitch)
+                {
+                    coroutineTick_ = mono_.StartCoroutine(tick());
+                }
             };
 
             int slideIndex = 0;
@@ -176,11 +210,13 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
         private IEnumerator tick()
         {
             currentSlideIndex_ = 0;
-            timer_ = 0;
+            float timer_ = 0;
             while (true)
             {
                 yield return new WaitForSeconds(1);
                 if (currentSlideIndex_ >= slideS_.Count)
+                    continue;
+                if (!rootUI.gameObject.activeInHierarchy)
                     continue;
                 var slide = slideS_[currentSlideIndex_];
                 timer_ += 1;

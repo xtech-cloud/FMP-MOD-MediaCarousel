@@ -16,13 +16,27 @@
   <GRPC address="https://localhost:19000"/>
   <!-- 样式列表
       name: 名称
+      autoSwitch: 是否自动切换，不自动切换时将显示上一个和下一个按钮
+      ButtonPrev: 上一个按钮 
+      ButtonNext: 下一个按钮 
+      ClickArea: 顶层的点击区域，不定义则隐藏
+      ClickArea.OnClickSubjectS: 点击区域被点击后发布的订阅主题
+      Slide.type: 幻灯片的类型，可选值为(Image,Video)
+      Slide.OnCreatedSubjectS: 幻灯片节点被创建后发布的订阅主题
+      Slide.OnActivatedSubjectS: 幻灯片节点被激活后发布的订阅主题
     -->
   <Styles>
-    <Style name="default">
+    <Style name="default" autoSwitch="false">
       <ClickArea>
         <OnClickSubjectS>
         </OnClickSubjectS>
       </ClickArea>
+      <ButtonPrev image="btnPrev.png">
+        <Anchor horizontal="left" vertical="center" marginH="0" marginV="0" width="100" height="100"/>
+      </ButtonPrev>
+      <ButtonNext image="btnNext.png">
+        <Anchor horizontal="right" vertical="center" marginH="0" marginV="0" width="100" height="100"/>
+      </ButtonNext >
       <SlideS>
         <Slide type="Image">
           <OnCreatedSubjectS>

@@ -20,8 +20,6 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
 
         public class ClickArea
         {
-            [XmlAttribute("visible")]
-            public bool visible { get; set; } = true;
 
             [XmlArray("OnClickSubjectS"), XmlArrayItem("Subject")]
             public Subject[] onClickSubjectS { get; set; } = new Subject[0];
@@ -31,10 +29,16 @@ namespace XTC.FMP.MOD.MediaCarousel.LIB.Unity
         {
             [XmlAttribute("name")]
             public string name { get; set; } = "";
+            [XmlAttribute("autoSwitch")]
+            public bool autoSwitch { get; set; } = true;
             [XmlElement("ClickArea")]
             public ClickArea clickArea { get; set; }
+            [XmlElement("ButtonPrev")]
+            public UiElement btnPrev { get; set; } = new UiElement();
+            [XmlElement("ButtonNext")]
+            public UiElement btnNext { get; set; } = new UiElement();
             [XmlArray("SlideS"), XmlArrayItem("Slide")]
-            public Slide[] slideS{ get; set; } = new Slide[0];
+            public Slide[] slideS { get; set; } = new Slide[0];
         }
 
 
